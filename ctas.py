@@ -13,13 +13,28 @@ class Stamp:
     stype: str
     status: str
 
+    # Enforce correct field types.
+    def __post_init__(self):
+        for (item, typ) in self.__annotations__.items():
+            if not isinstance(self.__dict__[item], typ):
+                current_t = type(self.__dict__[item])
+                raise TypeError(f"{item} needs to be of type {typ}, not {current_t}.")
+
+
+def write_stamp(stamp, db_cur) -> None:
+    data = [stamp.time, stamp.stamper, stamp.sid,
+            stamp.sname, stamp.stype, stamp.status]
+    db_cur.execute("INSERT INTO stamp(?, ?, ?, ?, ?, ?)", data)
+
+
+
 
 db_name = "db.db"
-p = Path('.')
+p = Path(f"./{db_name}")
 
-db_con = sqlite3.connect("db.db")
+db_con = sqlite3.connect(db_name)
 db_cur = db_con.cursor()
-if db_name not in p:
+if not p.exists():
     db_cur.execute("CREATE TABLE stamp(time, stamper, sid, sname, stype, status)")
 
 db_con.close()
