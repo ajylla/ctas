@@ -1,0 +1,14 @@
+{
+    "stamps": [
+        {
+            "sid":      100,
+            "sname":    "ClockIn",
+            "stype":    "clock_start"
+        },
+        {
+            "sid":      200,
+            "sname":    "ClockOut",
+            "stype":    "clock_stop"
+        }
+    ]
+}
