@@ -49,6 +49,30 @@ def read_config(path="config.ini"):
     return parser
 
 
+def status(args):
+    print("Status!")
+
+
+def stamp(args):
+    print(f"Stamped: {args.name}")
+
+
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(prog="CTAS")
+    subparsers = parser.add_subparsers()
+
+    # 'status' subcommand
+    parser_status = subparsers.add_parser("status")
+    parser_status.set_defaults(func=status)
+
+    # 'stamp' subcommand
+    parser_stamp = subparsers.add_parser("stamp")
+    parser_stamp.add_argument("name", type=str, help="Name of the stamp")
+    parser_stamp.set_defaults(func=stamp)
+
+    args = parser.parse_args()
+    args.func(args)
+
     db_con, db_cur = db_init()
     db_con.close()
