@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import configparser
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime
@@ -40,6 +41,12 @@ def db_init():
         db_cur.execute("CREATE TABLE stamp(time, stamper, sid, sname, stype, status)")
 
     return db_con, db_cur
+
+
+def read_config(path="config.ini"):
+    parser = configparser.ConfigParser()
+    parser.read(path)
+    return parser
 
 
 if __name__ == "__main__":
