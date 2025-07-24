@@ -63,17 +63,19 @@ def walk(start, end):
             else:
                 continue
 
-    print(worktime)
+    return worktime
 
 
 
 
 def status_callback(args):
-    for row in db_cur.execute("""SELECT * FROM stamp
-                                 WHERE time BETWEEN '2025-07-24 16:20' AND '2025-07-24 16:25'
-                                 ORDER BY time ASC""").fetchall():
-        print(row)
-    walk(datetime.fromisoformat("2025-07-24 16:20"), datetime.fromisoformat("2025-07-24 16:25"))
+    now = datetime.today()
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=1)
+    worktime = walk(start, end)
+    print(f"Time worked today: {worktime}")
+    working_hours = timedelta(hours=float(config["User"]["DailyHours"]))
+    print(f"That's {worktime/working_hours * 100} %")
 
 
 def stamp_callback(args):
