@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sqlite3
 import json
 import configparser
@@ -132,13 +134,15 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers()
 
     # 'status' subcommand
-    parser_status = subparsers.add_parser("status")
+    parser_status = subparsers.add_parser("status", help="Command to show status",
+                                          description="Use this command to show status")
     parser_status.set_defaults(func=status_callback)
 
     # 'stamp' subcommand
-    parser_stamp = subparsers.add_parser("stamp")
+    parser_stamp = subparsers.add_parser("stamp", help="Command to make new stamps",
+                                         description="Use this command to create stamps")
     parser_stamp.add_argument("stamp", help="Name or ID of the stamp")
-    parser_stamp.add_argument("--stamper", type=str)
+    parser_stamp.add_argument("--stamper", type=str, help="Specify name of stamper")
     parser_stamp.set_defaults(func=stamp_callback)
 
     args = parser.parse_args()
