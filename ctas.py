@@ -6,13 +6,13 @@ from random import choice
 from hashlib import sha1
 from pathlib import Path
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 @dataclass
 class Stamp:
     uid: str
-    time: datetime
+    time: datetime | str
     stamper: str
     sid: int
     sname: str
@@ -26,6 +26,9 @@ class Stamp:
                 current_t = type(self.__dict__[item])
                 raise TypeError(f"{item} needs to be of type {typ}, not {current_t}.")
 
+        if type(self.time) is str:
+            self.time = datetime.fromisoformat(self.time)
+
 
 def write_stamp(stamp):
     data = [stamp.uid, stamp.time, stamp.stamper, stamp.sid,
@@ -34,8 +37,43 @@ def write_stamp(stamp):
     db_con.commit()
 
 
+def walk(start, end):
+    stamps = db_cur.execute("""SELECT * FROM stamp
+                               WHERE time BETWEEN ?
+                               AND ?
+                               ORDER BY time ASC""", (start.isoformat(sep=' '),
+                                                      end.isoformat(sep=' ')))
+
+    clock_running = False
+    start_time = None
+    worktime = timedelta()
+    for s in stamps:
+        stamp = Stamp(*s)
+        if not clock_running:
+            if stamp.stype == "clock-start":
+                start_time = stamp.time
+                clock_running = True
+            else:
+                continue
+        else:
+            if stamp.stype == "clock-stop":
+                dt = stamp.time - start_time
+                worktime += dt
+                clock_running = False
+            else:
+                continue
+
+    print(worktime)
+
+
+
+
 def status_callback(args):
-    print(db_cur.execute("SELECT * FROM stamp").fetchall())
+    for row in db_cur.execute("""SELECT * FROM stamp
+                                 WHERE time BETWEEN '2025-07-24 16:20' AND '2025-07-24 16:25'
+                                 ORDER BY time ASC""").fetchall():
+        print(row)
+    walk(datetime.fromisoformat("2025-07-24 16:20"), datetime.fromisoformat("2025-07-24 16:25"))
 
 
 def stamp_callback(args):
