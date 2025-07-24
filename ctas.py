@@ -29,32 +29,27 @@ def write_stamp(stamp, db_cur) -> None:
     db_cur.execute("INSERT INTO stamp(?, ?, ?, ?, ?, ?)", data)
 
 
-def db_init():
-    db_name = "db.db"
-    p = Path(f"./{db_name}")
-
-    db_exists = p.exists()
-    db_con = sqlite3.connect(db_name)
-    db_cur = db_con.cursor()
-
-    if not db_exists:
-        db_cur.execute("CREATE TABLE stamp(time, stamper, sid, sname, stype, status)")
-
-    return db_con, db_cur
-
-
-def read_config(path="config.ini"):
-    parser = configparser.ConfigParser()
-    parser.read(path)
-    return parser
-
-
-def status(args):
+def status_callback(args):
     print("Status!")
 
 
-def stamp(args):
+def stamp_callback(args):
     print(f"Stamped: {args.name}")
+
+
+# Read config
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+# Init database
+db_path = Path(config["Paths"]["DBPath"])
+db_exists = db_path.exists()
+db_con = sqlite3.connect(db_path)
+db_cur = db_con.cursor()
+if not db_exists:
+    db_cur.execute("CREATE TABLE stamp(time, stamper, sid, sname, stype, status)")
+
+del db_exists
 
 
 if __name__ == "__main__":
@@ -64,15 +59,14 @@ if __name__ == "__main__":
 
     # 'status' subcommand
     parser_status = subparsers.add_parser("status")
-    parser_status.set_defaults(func=status)
+    parser_status.set_defaults(func=status_callback)
 
     # 'stamp' subcommand
     parser_stamp = subparsers.add_parser("stamp")
     parser_stamp.add_argument("name", type=str, help="Name of the stamp")
-    parser_stamp.set_defaults(func=stamp)
+    parser_stamp.set_defaults(func=stamp_callback)
 
     args = parser.parse_args()
     args.func(args)
 
-    db_con, db_cur = db_init()
     db_con.close()
