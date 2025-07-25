@@ -2,6 +2,7 @@
 
 import sqlite3
 import json
+import os
 import configparser
 from string import ascii_lowercase
 from random import choice
@@ -107,15 +108,24 @@ def stamp_callback(args):
     write_stamp(stamp)
 
 
+# Environment variable
+try:
+    path_prefix = os.environ['CTAS_PATH']
+except KeyError:
+    print("It looks like this is your first time running this program.")
+    print("Ask sysadmin (Aleksi) for help with installation.")
+    exit()
+
+
 # Read config
 config = configparser.ConfigParser()
-config.read("config.ini")
+config.read(path_prefix+"/config.ini")
 
-with open(config["Paths"]["StampsPath"]) as f:
+with open(path_prefix+'/'+config["Paths"]["StampsPath"]) as f:
     stamps = json.load(f)['stamps']
 
 # Init database
-db_path = Path(config["Paths"]["DBPath"])
+db_path = Path(path_prefix+'/'+config["Paths"]["DBPath"])
 db_exists = db_path.exists()
 db_con = sqlite3.connect(db_path)
 db_cur = db_con.cursor()
